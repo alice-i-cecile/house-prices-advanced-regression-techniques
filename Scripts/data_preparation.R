@@ -142,7 +142,7 @@ clean_data <- function(my_data){
     wide_double_hot <- data.frame(predict(encoder, df))
     
     dh_names <- Reduce(union, lapply(df, unique))
-    double_hot <- data.frame(matrix(nrow = nrow(df), ncol=length(dh_names)))
+    double_hot <- data.frame(matrix(nrow = nrow(df), ncol=length(dh_names), data=0))
     names(double_hot) <- dh_names
     
     for (i in 1:ncol(wide_double_hot)){
