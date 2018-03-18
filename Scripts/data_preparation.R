@@ -25,7 +25,7 @@ test <- read.csv("./Data/test.csv", stringsAsFactors = FALSE)
 # YearRemodAdd: Good; treat as numeric
 # RoofStyle: Some classes very rare
 # RoofMatl: Some classes very rare
-# Exterior1st, Exterior2nd: Combine, change to 1-hot encoding
+# Exterior1st, Exterior2nd: Combine, change to 2-hot encoding
 # MasVnrType: True missing values; impute
 # MasVnrArea: True missing values; impute
 # ExterQual: Change to ordered factor or numeric
@@ -137,8 +137,23 @@ clean_data <- function(my_data){
     return(col)
   }
   
-  one_hot_combine <- function(...){
-    # TODO: add this functionality
+  two_hot_combine <- function(df){
+    encoder <- onehot(df, stringsAsFactors = TRUE)
+    wide_double_hot <- data.frame(predict(encoder, df))
+    
+    dh_names <- Reduce(union, lapply(df, unique))
+    double_hot <- data.frame(matrix(nrow = nrow(df), ncol=length(dh_names)))
+    names(double_hot) <- dh_names
+    
+    for (i in 1:ncol(wide_double_hot)){
+      col_id <- strsplit(colnames(wide_double_hot)[i], split="\\.")[[1]][2]
+      double_hot[col_id] = double_hot[col_id] + wide_double_hot[i]
+    }
+     
+    names(double_hot) <- paste0("Condition.", dh_names)
+    
+    return(double_hot)
+      
   }
   
   false_NA_col <- c('Alley', 
@@ -169,9 +184,10 @@ clean_data <- function(my_data){
   my_data['Functional'] <- order_Functional(my_data['Functional'])
   my_data['PavedDrive'] <- order_PavedDrive(my_data['PavedDrive'])
   
-  # Combine one-hot columns
-  #TODO: implement
-  
+  # Combine two-hot columns
+  my_data <- cbind(my_data, two_hot_combine(my_data[c('Condition1', 'Condition2')]))
+  within(my_data, rm(Condition1, Condition2))
+
   return(my_data)
   
 }
