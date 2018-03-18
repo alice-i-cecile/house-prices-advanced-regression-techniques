@@ -1,3 +1,6 @@
+# Libraries ####
+library(onehot)
+
 # Loading data ####
 train <- read.csv("./Data/train.csv", stringsAsFactors = FALSE)
 test <- read.csv("./Data/test.csv", stringsAsFactors = FALSE)
@@ -31,8 +34,8 @@ test <- read.csv("./Data/test.csv", stringsAsFactors = FALSE)
 # ExterQual: Change to ordered factor or numeric
 # ExterCond: Change to ordered factor or numeric
 # Foundation: Some classes very rare
-# BsmtQual: False NAs
-# BsmtCond: False NAs
+# BsmtQual: False NAs, change to ordered factor or numeric
+# BsmtCond: False NAs, change to ordered factor or numeric
 # BsmtExposure: False NA's, one true NA
 # BsmtFinType1, BsmtFinType2: False NAs, one true NA
 # BsmtFinSF1, BsmtFinSF2, BsmtUnfSF, TotalBsmtSF: Good
@@ -98,7 +101,8 @@ clean_data <- function(my_data){
     col[col=='TA'] <- 2
     col[col=='Gd'] <- 3
     col[col=='Ex'] <- 4
-    col[col=='None'] <- -1 #FIXME: ugly hack, only relevant to FireplaceQu
+
+    col[col=='None'] <- -1 # FIXME: Ugly hack
     
     return (col)
   }
@@ -137,6 +141,58 @@ clean_data <- function(my_data){
     return(col)
   }
   
+  order_BsmtExposure <- function(col){
+    # Gd	Good Exposure
+    # Av	Average Exposure (split levels or foyers typically score average or above)	
+    # Mn	Mimimum Exposure
+    # No	No Exposure
+    # NA	No Basement
+    
+    col[col=='No'] <- 0
+    col[col=='Mn'] <- 1
+    col[col=='Av'] <- 2
+    col[col=='Gd'] <- 3
+    
+    col[col=='None'] <- -1 # FIXME: Ugly hack
+    
+    return (col)
+    
+  }
+  
+  order_GarageFinish <- function(col){
+    # Fin	Finished
+    # RFn	Rough Finished	
+    # Unf	Unfinished
+    # NA	No Garage
+    
+    col[col=='Unf'] <- 0
+    col[col=='RFn'] <- 1
+    col[col=='Fin'] <- 2
+
+    col[col=='None'] <- -1 # FIXME: Ugly hack
+    
+    return (col)
+    
+  }
+  
+  order_Electrical <- function(col){
+    # SBrkr	Standard Circuit Breakers & Romex
+    # FuseA	Fuse Box over 60 AMP and all Romex wiring (Average)	
+    # FuseF	60 AMP Fuse Box and mostly Romex wiring (Fair)
+    # FuseP	60 AMP Fuse Box and mostly knob & tube wiring (poor)
+    # Mix	Mixed
+    
+    col[col=='FuseP'] <- 0
+    col[col=='FuseF'] <- 1
+    col[col=='FuseA'] <- 2
+    col[col=='SBrkr'] <- 3
+    
+    col[col=='Mix'] <- 2 # kinda arbitrary
+    
+    return (col)
+    
+  }
+  
   two_hot_combine <- function(df){
     encoder <- onehot(df, stringsAsFactors = TRUE)
     wide_double_hot <- data.frame(predict(encoder, df))
@@ -156,6 +212,7 @@ clean_data <- function(my_data){
       
   }
   
+  # Commented lines break data type to replace with "None" value
   false_NA_col <- c('Alley', 
                     'BsmtQual', 
                     'BsmtCond', 
@@ -164,7 +221,7 @@ clean_data <- function(my_data){
                     'BsmtFinType2', #FIXME: overwrites true missing
                     'FireplaceQu',
                     'GarageType',
-                    # 'GarageYrBlt', # Breaks column type to replace NA values
+                    'GarageYrBlt',
                     'GarageFinish',
                     'GarageQual',
                     'GarageCond',
@@ -174,8 +231,9 @@ clean_data <- function(my_data){
   
   qual_col <- c('ExterQual', 'ExterCond',
                 'KitchenQual',
+                'BsmtQual', 'BsmtCond',
                 'GarageQual', 'GarageCond',
-                'FireplaceQu', 
+                'FireplaceQu',
                 'PoolQC')
   
   # Fix false NAs
@@ -185,6 +243,8 @@ clean_data <- function(my_data){
   my_data[qual_col] <- apply(my_data[qual_col], 2, order_qual_codes)
   my_data['Functional'] <- order_Functional(my_data['Functional'])
   my_data['PavedDrive'] <- order_PavedDrive(my_data['PavedDrive'])
+  my_data['BsmtExposure'] <- order_BsmtExposure(my_data['BsmtExposure'])
+  my_data['Electrical'] <- order_Electrical(my_data['Electrical'])
   
   # Combine two-hot columns
   my_data <- cbind(my_data, two_hot_combine(my_data[c('Condition1', 'Condition2')]))
@@ -197,5 +257,5 @@ clean_data <- function(my_data){
 clean_train <- clean_data(train)
 clean_test <- clean_data(test)
 
-write.csv(clean_train, "./Data/clean_train.csv")
-write.csv(clean_train, "./Data/clean_test.csv")
+write.csv(clean_train, "./Data/clean_train.csv", row.names=FALSE)
+write.csv(clean_train, "./Data/clean_test.csv", row.names=FALSE)
