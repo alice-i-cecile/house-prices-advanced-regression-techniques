@@ -69,7 +69,7 @@ test <- read.csv("./Data/test.csv", stringsAsFactors = FALSE)
 # X3SSnPorch: Good, but referred to as "3SsnPorch" in docs
 # ScreenPorch: Good
 # PoolArea: Good
-# PoolQC: Change to ordered factor or numeric
+# PoolQC: False NAs, change to ordered factor or numeric
 # Fence: False NAs
 # MiscFeature: False NAs, some classes very rare
 # MiscVal: Good
@@ -168,7 +168,9 @@ clean_data <- function(my_data){
                     'GarageFinish',
                     'GarageQual',
                     'GarageCond',
-                    'Fence')
+                    'PoolQC',
+                    'Fence',
+                    'MiscFeature')
   
   qual_col <- c('ExterQual', 'ExterCond',
                 'KitchenQual',
