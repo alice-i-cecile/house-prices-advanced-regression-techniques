@@ -164,7 +164,7 @@ clean_data <- function(my_data){
                     'BsmtFinType2', #FIXME: overwrites true missing
                     'FireplaceQu',
                     'GarageType',
-                    # 'GarageYrBuilt', # Breaks column type to replace NA values
+                    # 'GarageYrBlt', # Breaks column type to replace NA values
                     'GarageFinish',
                     'GarageQual',
                     'GarageCond',
