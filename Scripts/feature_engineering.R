@@ -105,7 +105,6 @@ dependent_engineer <- function(train, test){
   
   # Impute missing values
   # LotFrontage is the biggest offender by far
-  # FIXME: still some missing values??
   frontage_model <- lm(LotFrontage ~ LotArea + sqrt(LotArea) + LotShape + LotConfig, data=train)
   
   frontage_train <- predict(frontage_model, newdata = train[is.na(train$LotFrontage),])
@@ -116,7 +115,36 @@ dependent_engineer <- function(train, test){
   
   # Impute rest of missing values
   # TODO: implement knn-imputation
+  fill_missing <- function(col_name){
+    
+    find_mode <- function(dat) {
+      sorted_table <- sort(table(dat), decreasing = T)
+      m <- names(sorted_table)[1]
+      
+      return(m)
+    }
+    
+    if(is.numeric(train[col_name])){
+      return(median(train[[col_name]], na.rm = TRUE))
+    } else {
+      return(find_mode(train[[col_name]]))
+    }
+  }
   
+  missing_train <- which(is.na(eng_train), arr.ind = T, useNames = T)
+  missing_test  <- which(is.na(eng_test), arr.ind = T, useNames = T)
+  
+  for (i in 1:nrow(missing_train)){
+    r <- missing_train[i,1]
+    c <- missing_train[i,2]
+    eng_train[r,c] <- fill_missing(names(eng_train[c]))
+  }
+  
+  for (i in 1:nrow(missing_test)){
+    r <- missing_test[i,1]
+    c <- missing_test[i,2]
+    eng_test[r,c] <- fill_missing(names(eng_train[c]))
+  }
   
   return (list(eng_train, eng_test))
 }
