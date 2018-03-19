@@ -1,6 +1,6 @@
 # Loading data ####
 clean_train <- read.csv("./Data/clean_train.csv", stringsAsFactors = FALSE)
-clean_test <- read.csv("./Data/clean_train.csv", stringsAsFactors = FALSE)
+clean_test <- read.csv("./Data/clean_test.csv", stringsAsFactors = FALSE)
 
 # Feature engineering ####
 
@@ -122,9 +122,9 @@ dependent_engineer <- function(train, test){
 }
 
 dependent_data <- dependent_engineer(engineered_train, engineered_test)
-engineered_train <- dependent_data[[1]]
-engineered_test  <- dependent_data[[2]]
+final_train <- dependent_data[[1]]
+final_test  <- dependent_data[[2]]
 
 # Saving data ####
-write.csv(engineered_train, "./Data/engineered_train.csv", row.names=FALSE)
-write.csv(engineered_test,  "./Data/engineered_test.csv", row.names=FALSE)
+write.csv(final_train, "./Data/engineered_train.csv", row.names=FALSE)
+write.csv(final_test,  "./Data/engineered_test.csv", row.names=FALSE)

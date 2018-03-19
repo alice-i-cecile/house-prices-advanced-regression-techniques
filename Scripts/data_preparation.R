@@ -258,4 +258,4 @@ clean_train <- clean_data(train)
 clean_test <- clean_data(test)
 
 write.csv(clean_train, "./Data/clean_train.csv", row.names=FALSE)
-write.csv(clean_train, "./Data/clean_test.csv", row.names=FALSE)
+write.csv(clean_test, "./Data/clean_test.csv", row.names=FALSE)
