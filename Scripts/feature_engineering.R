@@ -84,8 +84,8 @@ independent_engineer <- function(my_data){
   
   # Fraction unfinished basement
   # BsmtUnfSF / TotalBsmtSF
-  # FIXME: Results odd
   eng$BsmtUnfPercent <- eng$BsmtUnfSF / eng$TotalBsmtSF
+  eng$BsmtUnfPercent[is.na(eng$BsmtUnfPercent)] <- 0
   
   # Any low quality finished
   # LowQualFinSF > 0
