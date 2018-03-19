@@ -248,7 +248,7 @@ clean_data <- function(my_data){
   
   # Combine two-hot columns
   my_data <- cbind(my_data, two_hot_combine(my_data[c('Condition1', 'Condition2')]))
-  within(my_data, rm(Condition1, Condition2))
+  my_data <- within(my_data, rm(Condition1, Condition2))
 
   return(my_data)
   
