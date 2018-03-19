@@ -39,7 +39,7 @@ independent_engineer <- function(my_data){
   # Remove low information columns ##
   # Possibile choices:
   # Utilities, MiscFeature, Street, Heating
-  within(eng, rm(Utilities, MiscFeature))
+  eng <- within(eng, rm(Utilities, MiscFeature))
       
   # Combine imbalanced columns ##
   # Possibile choices:
@@ -90,6 +90,12 @@ independent_engineer <- function(my_data){
   # Any low quality finished
   # LowQualFinSF > 0
   eng$LowQualFinPresence <- (eng$LowQualFin > 0)
+  
+  
+  # Remove colinear columns as found by lm()
+  # Exterior2ndCBlock       TotalBsmtSF         GrLivArea  GarageFinishNone
+  
+  eng <- within(eng, rm(Exterior2nd, TotalBsmtSF, GrLivArea, GarageFinish))
   
   return (eng)
 }
