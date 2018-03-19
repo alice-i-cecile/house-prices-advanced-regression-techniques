@@ -91,18 +91,6 @@ independent_engineer <- function(my_data){
   # LowQualFinSF > 0
   eng$LowQualFinPresence <- (eng$LowQualFin > 0)
   
-  # Centering and scaling ##
-  center_scale <- function(col){
-    if (is.numeric(col)){
-      col <- col - mean(col, na.rm = T)
-      col <- col / var(col, na.rm = T)
-    }
-    
-    return (col)
-  }   
-  
-  eng <- data.frame(sapply(eng, center_scale))
-  
   return (eng)
 }
 
