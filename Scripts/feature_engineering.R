@@ -1,6 +1,6 @@
 # Loading data ####
-clean_train <- read.csv("./Data/clean_train.csv")
-clean_test <- read.csv("./Data/clean_train.csv")
+clean_train <- read.csv("./Data/clean_train.csv", stringsAsFactors = FALSE)
+clean_test <- read.csv("./Data/clean_train.csv", stringsAsFactors = FALSE)
 
 # Feature engineering ####
 
@@ -26,7 +26,7 @@ independent_engineer <- function(my_data){
   
   # Impute mising 'GarageYrBuilt' data by selecting random possible year ##
   # FIXME: this is a terrible solution; the data is not truly missing
-  end_year <- max(as.numeric(as.character(eng$GarageYrBlt)), na.rm = T)
+  end_year <- max(as.numeric(eng$GarageYrBlt), na.rm = T)
   
   for (i in 1:nrow(eng)){
     if (eng[i, 'GarageYrBlt'] == 'None'){
@@ -34,7 +34,7 @@ independent_engineer <- function(my_data){
     }
   }
   
-  eng['GarageYrBlt'] <- as.numeric(as.character(eng['GarageYrBlt']))
+  eng['GarageYrBlt'] <- lapply(eng['GarageYrBlt'], as.numeric)
     
   # Remove low information columns ##
   # Possibile choices:
