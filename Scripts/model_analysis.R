@@ -167,8 +167,11 @@ print(model_performance)
 # Submission preparation ####
 prepare_submission <- function(predictions, sub_name){
   sub_df <- data.frame(Id=engineered_test$Id, SalePrice=predictions)
+  names(sub_df) <- c("Id", "SalePrice")
   
-  write.csv(sub_df, file=paste0("./Submissions/", sub_name, ".csv"))
+  write.csv(sub_df, file=paste0("./Submissions/", sub_name, ".csv"),
+            quote=FALSE,
+            col.names = FALSE, row.names=FALSE)
 }
 
 for (i in 1:ncol(test_pred)){
