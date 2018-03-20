@@ -8,7 +8,7 @@ engineered_train <- read.csv("./Data/engineered_train.csv")
 engineered_test <- read.csv("./Data/engineered_test.csv")
 
 # Extracting metrics and predictions ####
-model_names <- c("glm", "lasso", "lm", "rf", "ridge")
+model_names <- c("gam", "glm", "lasso", "lm", "rf", "ridge")
 
 model_performance <- data.frame(matrix(nrow=length(model_names), ncol=7))
 names(model_performance) <- c("Model", "RMSE", "RSquared", "MAE", "RMSESD", "RsquaredSD", "MAESD")
@@ -23,11 +23,21 @@ names(test_pred) <- model_names
 for (i in 1:length(model_names)) {
   m_name <- model_names[i]
   m <- readRDS(paste0("./Saved_Models/", m_name, ".rds"))
-  best_row <- which.min(m$results$RMSE)
-  model_performance[i, 2:7] <- m$results[best_row, 2:7]
+  
+  if (m_name == "gam") {
+    model_performance[i, "RSquared"] <- summary(m)$r.sq
+  } else {
+    best_row <- which.min(m$results$RMSE)
+    model_performance[i, 2:7] <- m$results[best_row, 2:7]
+  }
   
   train_pred[[m_name]] <- predict(m, newdata = engineered_train)
   test_pred[[m_name]]  <- predict(m, newdata = engineered_test)
+  
+  if (m_name == "gam"){
+    train_pred[[m_name]] <- exp(train_pred[[m_name]])
+    test_pred[[m_name]] <- exp(test_pred[[m_name]])
+  }
 }
 
 # Set NA and negative predictions to dataset mean
@@ -38,22 +48,9 @@ train_pred[train_pred < 0] <- mean(engineered_train$SalePrice)
 test_pred[test_pred < 0]   <- mean(engineered_train$SalePrice)
 
 
-# Using RMSE of log SalePrice as per competition
-check_score <- function(predictions) {
-  pred <- log(predictions)
-  actual <- log(engineered_train$SalePrice)
-  
-  error <- actual - pred
-  square_error <- error*error
-  mean_error <- mean(square_error, na.rm=TRUE)
-  
-  RMSE <- sqrt(mean_error)
-  
-  return(RMSE)
-}
-
 # Ensembling ####
-ensemble_names <- c("ensemble_all", "ensemble_ridge_rf", "stack_lasso", "stack_rf")
+# TODO: use exponential averaging
+ensemble_names <- c("ensemble_all", "ensemble_ridge_rf", "stack_lasso")
 ensemble_start <- length(model_names)+1
 ensemble_end <- length(model_names)+length(ensemble_names)
 
@@ -66,9 +63,7 @@ test_pred$ensemble_all <- rowMeans(test_pred)
 train_pred$ensemble_ridge_rf <- rowMeans(train_pred[c('ridge','rf')])
 test_pred$ensemble_ridge_rf <- rowMeans(test_pred[c('ridge','rf')])
 
-
 # Stacking ##
-
 stack_x_train <- data.frame(sapply(train_pred[model_names], log))
 stack_x_test  <- data.frame(sapply(test_pred[model_names], log))
 stack_y <- log(engineered_train$SalePrice)
@@ -78,11 +73,6 @@ stack_data <- cbind(stack_x_train, stack_y)
 stack_lasso <- train(stack_y~.+0, data=stack_data, method='lasso')
 train_pred$stack_lasso <- exp(predict(stack_lasso, newdata = stack_x_train))
 test_pred$stack_lasso  <- exp(predict(stack_lasso, newdata = stack_x_test))
-
-# Random forest stack
-stack_rf <- train(stack_y~., data=stack_data, method='rf')
-train_pred$stack_rf <- exp(predict(stack_rf, newdata = stack_x_train))
-test_pred$stack_rf  <- exp(predict(stack_rf, newdata = stack_x_test))
 
 # Visualizations ####
 
@@ -131,7 +121,7 @@ make_cor_plot <- function(dat, method="pearson"){
   cor_plot <- ggplot(data = melted_cormat, aes(Var2, Var1, fill = value)) +
     geom_tile(color = "white") +
     scale_fill_gradient2(low = "dodgerblue4", high = "red4", mid = "white", 
-                         midpoint = 0.975, limit = c(0.95,1), space = "Lab", 
+                         midpoint = 0.9, limit = c(0.8,1), space = "Lab", 
                          name="Correlation") +
     theme_minimal() + 
     theme(axis.text.x = element_text(angle = 45, vjust = 1, 
@@ -142,8 +132,8 @@ make_cor_plot <- function(dat, method="pearson"){
   return(cor_plot)
 }
 
-make_cor_plot(train_pred)
-make_cor_plot(test_pred)
+make_cor_plot(log(train_pred))
+make_cor_plot(log(test_pred))
 
 # Prediction error by sale price ####
 error_df <- train_pred
@@ -157,6 +147,20 @@ ggplot(melted_error, aes(x=SalePrice, y=value, colour=variable)) +
     geom_hline(yintercept = 0) + theme_bw()
 
 # Evaluation ####
+# Using RMSE of log SalePrice as per competition
+check_score <- function(predictions) {
+  pred <- log(predictions)
+  actual <- log(engineered_train$SalePrice)
+  
+  error <- actual - pred
+  square_error <- error*error
+  mean_error <- mean(square_error, na.rm=TRUE)
+  
+  RMSE <- sqrt(mean_error)
+  
+  return(RMSE)
+}
+
 model_performance$score <- NA
 for (i in 1:ncol(train_pred)) {
   model_performance[i, "score"] <- check_score(train_pred[[i]])
