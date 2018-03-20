@@ -17,4 +17,4 @@ print(glmnet_model)
 summary(glmnet_model)
 
 # Saving model ####
-save(glmnet_model, file="./Saved_Models/glmnet.RData")
+saveRDS(glmnet_model, file="./Saved_Models/glmnet.rds")

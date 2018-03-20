@@ -15,4 +15,4 @@ print(lasso_model)
 summary(lasso_model)
 
 # Saving model ####
-save(lasso_model, file="./Saved_Models/lasso.RData")
+saveRDS(lasso_model, file="./Saved_Models/lasso.rds")

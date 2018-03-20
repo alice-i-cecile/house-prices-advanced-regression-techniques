@@ -15,4 +15,4 @@ print(rf_model)
 summary(rf_model)
 
 # Saving model ####
-save(rf_model, file="./Saved_Models/rf.RData")
+saveRDS(rf_model, file="./Saved_Models/rf.rds")

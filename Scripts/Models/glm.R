@@ -16,4 +16,4 @@ print(glm_model)
 summary(glm_model)
 
 # Saving model ####
-save(glm_model, file="./Saved_Models/glm.RData")
+saveRDS(glm_model, file="./Saved_Models/glm.rds")

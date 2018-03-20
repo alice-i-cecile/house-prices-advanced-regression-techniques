@@ -15,4 +15,4 @@ print(ridge_model)
 summary(ridge_model)
 
 # Saving model ####
-save(ridge_model, file="./Saved_Models/ridge.RData")
+saveRDS(ridge_model, file="./Saved_Models/ridge.rds")

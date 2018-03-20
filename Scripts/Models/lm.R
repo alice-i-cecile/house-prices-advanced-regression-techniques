@@ -14,4 +14,4 @@ print(lm_model)
 summary(lm_model)
 
 # Saving model ####
-save(lm_model, file="./Saved_Models/lm.RData")
+saveRDS(lm_model, file="./Saved_Models/lm.rds")
