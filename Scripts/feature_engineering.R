@@ -2,6 +2,8 @@
 clean_train <- read.csv("./Data/clean_train.csv", stringsAsFactors = FALSE)
 clean_test <- read.csv("./Data/clean_test.csv", stringsAsFactors = FALSE)
 
+# FIXME: Id column being used for prediction
+
 # Feature engineering ####
 
 set.seed(42)
