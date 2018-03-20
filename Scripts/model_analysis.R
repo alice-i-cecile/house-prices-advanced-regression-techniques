@@ -170,8 +170,7 @@ prepare_submission <- function(predictions, sub_name){
   names(sub_df) <- c("Id", "SalePrice")
   
   write.csv(sub_df, file=paste0("./Submissions/", sub_name, ".csv"),
-            quote=FALSE,
-            col.names = FALSE, row.names=FALSE)
+            quote=FALSE, row.names=FALSE)
 }
 
 for (i in 1:ncol(test_pred)){
